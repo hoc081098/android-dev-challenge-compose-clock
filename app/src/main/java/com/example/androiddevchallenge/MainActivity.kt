@@ -18,11 +18,18 @@ package com.example.androiddevchallenge
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.androiddevchallenge.MainState.WatchState.*
 import com.example.androiddevchallenge.ui.theme.MyTheme
 
 class MainActivity : AppCompatActivity() {
@@ -39,8 +46,76 @@ class MainActivity : AppCompatActivity() {
 // Start building your app here!
 @Composable
 fun MyApp() {
+    val vm = viewModel<MainVM>()
+    val state by vm.stateFlow.collectAsState()
+
+    val mm = (state.seconds / 60).toString().padStart(2, '0')
+    val ss = (state.seconds % 60).toString().padStart(2, '0')
+
     Surface(color = MaterialTheme.colors.background) {
-        Text(text = "Ready... Set... GO!")
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(text = "Countdown Timer")
+                    }
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Buttons(state.watchState, vm.dispatch)
+                }
+                Spacer(modifier = Modifier.requiredHeight(16.dp))
+                Text(text = "$mm:$ss", style = MaterialTheme.typography.h3)
+            }
+        }
+    }
+}
+
+@Composable
+fun Buttons(watchState: MainState.WatchState, dispatch: (MainAction) -> Unit) {
+    when (watchState) {
+        RUNNING -> {
+            Button(onClick = { dispatch(MainAction.START) }, enabled = false) {
+                Text(text = "START")
+            }
+            Button(onClick = { dispatch(MainAction.PAUSE) }) {
+                Text(text = "PAUSE")
+            }
+            Button(onClick = { dispatch(MainAction.RESET) }) {
+                Text(text = "RESET")
+            }
+        }
+        PAUSED -> {
+            Button(onClick = { dispatch(MainAction.START) }) {
+                Text(text = "RESUME")
+            }
+            Button(onClick = { dispatch(MainAction.PAUSE) }, enabled = false) {
+                Text(text = "PAUSE")
+            }
+            Button(onClick = { dispatch(MainAction.RESET) }) {
+                Text(text = "RESET")
+            }
+        }
+        IDLE -> {
+            Button(onClick = { dispatch(MainAction.START) }) {
+                Text(text = "START")
+            }
+            Button(onClick = { dispatch(MainAction.PAUSE) }, enabled = false) {
+                Text(text = "PAUSE")
+            }
+            Button(onClick = { dispatch(MainAction.RESET) }, enabled = false) {
+                Text(text = "RESET")
+            }
+        }
     }
 }
 
