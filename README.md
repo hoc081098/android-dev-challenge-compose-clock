@@ -10,8 +10,7 @@ Very simple countdown timer clock.
 
 
 ## :bulb: Motivation and Context
-<!--- Optionally point readers to interesting parts of your submission. -->
-<!--- What are you especially proud of? -->
+State management by using ViewMode, MVI pattern and Coroutines Flow.
 
 
 ## :camera_flash: Screenshots
